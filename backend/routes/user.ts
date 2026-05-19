@@ -1,8 +1,9 @@
+import type { Request, Response } from 'express';
 import express from 'express';
 import { User } from '../db';
 import bcrypt from 'bcrypt';
 import JWT_SECRET from '../config';
-import z, { boolean } from 'zod';
+import z from 'zod';
 import jwt from 'jsonwebtoken';
 
 const router = express.Router();
@@ -14,7 +15,7 @@ const signupSchema = z.object({
     lastName: z.string().min(2).max(50)
 })
 
-router.post('/signup', async(req, res) => {
+router.post('/signup', async (req: Request, res: Response) => {
     const { success } = signupSchema.safeParse(req.body);
     if (!success) {
         return res.status(400).json({
@@ -50,6 +51,34 @@ router.post('/signup', async(req, res) => {
         token: token
     })
 
+})
+
+router.post('/signin', async (req: Request, res: Response) => {
+    const { username, password } = req.body;
+    const user = await User.findOne({
+        username: username
+    });
+    if (!user?._id) {
+        return res.status(400).json({
+            message: "Invalid username or password"
+        });
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid){
+        return res.status(400).json({
+            message: "Invalid username or password"
+        })
+    }
+    const token = jwt.sign({
+        userId: user._id,
+    }, JWT_SECRET, {
+        expiresIn: "1h"
+    });
+    res.status(200).json({
+        message: "User signed in successfully",
+        token: token
+    })
 })
 
 export default router;
