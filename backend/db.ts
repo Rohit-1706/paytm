@@ -1,6 +1,6 @@
 import { password } from "bun";
 import mongoose from "mongoose";
-import { maxLength, minLength, trim } from "zod";
+import { email, maxLength, minLength, trim } from "zod";
 const MONGO_URI = process.env.MONGO_URI || "mongodb://localhost:27017/paytm";
 
 
