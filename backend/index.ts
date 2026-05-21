@@ -1,9 +1,11 @@
 import type { Application, Request, Response } from 'express';
 import express from 'express';
-import mainRouter from './routes/index';
 import cors from 'cors';
+import mainRouter from './routes/index';
 
 const app: Application = express();
+
+// Enable CORS for all routes
 app.use(cors());
 
 // Middleware to parse JSON bodies
