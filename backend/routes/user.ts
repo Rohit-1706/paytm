@@ -1,6 +1,6 @@
 import type { Request, Response } from 'express';
 import express from 'express';
-import { User } from '../db';
+import { Account, User } from '../db';
 import bcrypt from 'bcrypt';
 import JWT_SECRET from '../config';
 import z from 'zod';
@@ -40,6 +40,13 @@ router.post('/signup', async (req: Request, res: Response) => {
     req.body.password = hashedPassword;
 
     const dbUser = await User.create(req.body);
+
+
+    // Assign a random balance to the user between 1000 and 10000
+    await Account.create({
+        userId: dbUser._id,
+        balance: Math.floor(Math.random() * (10000 - 1000 + 1)) + 1000
+    })
 
     const token = jwt.sign({
         userId: dbUser._id,
@@ -100,7 +107,7 @@ router.put('/', authMiddleware, async (req: Request, res: Response) => {
 
     const { success } = updateUserSchema.safeParse(req.body);
     if (!success) {
-        return res.status(400).json({
+        return res.status(411).json({
             message: "Invalid input data"
         });
     }
